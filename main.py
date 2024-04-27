@@ -18,43 +18,96 @@ columns = 7
 rows = 6
 scale = 100
 
-class Player():
+class Player:
     def __init__(self):
-        self.team
+        self.team = 'red' # Initialize both teams to red, switch team 2 to yellow; this is going to break something later
         pass
         
     
 
-    class Chip():
-        def __init__(self):
-            self.column = None
-            self.row = None
-            
-        def place_chip(self, column) -> bool:
-            self.color = Color(self.team)
-            temp_row = 0
-            for row in game_state[column]:
-                if row == 0 and game_state[column][temp_row] is not None:
-                    print('Column Full!')
-                    return False
-                
-                elif row + 1 >= rows or game_state[column][row+1] is not None:
-                    game_state[column][temp_row] = self
-                    self.column = column
-                    self.row = row
-                    return True
-                    
-                elif game_state[column][row+1] is None:
-                    temp_row += 1
-                    
-                else: 
-                    print('error')
-                    return False
-                
-                
-        def draw(self, screen):
-            pygame.draw.ellipse(screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
+class Chip:
+    def __init__(self):
+        self.column = None
+        self.row = None
         
+    def place_chip(self, column) -> bool:
+        self.color = Color(self.team)
+        temp_row = 0
+        for row in game_state[column]:
+            if row == 0 and game_state[column][temp_row] is not None:
+                print('Column Full!')
+                return False
+            
+            elif row + 1 >= rows or game_state[column][row+1] is not None:
+                game_state[column][temp_row] = self
+                self.column = column
+                self.row = row
+                return True
+                
+            elif game_state[column][row+1] is None:
+                temp_row += 1
+                
+            else: 
+                print('error')
+                return False
+            
+            
+    def draw(self, screen):
+        pygame.draw.ellipse(screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
+        
+
+def check_win(chip):
+    local_game_state = game_state.copy()
+    test_list = []
+    # Check adjacent
+    for column in range (chip.column - 4, chip.column + 4):
+        if column >= 0 and column < columns:
+            test_list.append(local_game_state[column][chip.row])
+            
+    for n in enumerate(test_list):
+        if n[1] is None:
+            continue
+        else:
+            test_list[n[0]] = test_list[n[0]].team
+            
+    is_winner(test_list, chip.team)
+    test_list.clear()
+    # Check vertical
+            
+    for row in enumerate(local_game_state[chip.column]):
+        test_list.append(row[1])
+
+    is_winner(test_list, chip.team)
+    test_list.clear()
+    
+    # Check y = x
+    
+            
+            
+            
+            
+            
+            
+            
+            
+
+def is_winner(test_list: list, team: str):
+    
+    counter = 0
+    memory = None
+    for n in test_list:
+        if n is None:
+            counter = 0
+        elif n == team:
+            counter += 1
+            print(counter, memory)
+        else:
+            counter = 0
+        memory = n
+        
+        if counter == 4:
+            print(team.capitalize(),'Wins!')
+
 
 
 def main():
@@ -80,10 +133,17 @@ def main():
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_column = event.__dict__['pos'][0] // scale
-                print(mouse_column)
-                new_chip = active_player.Chip()
-                new_chip.place_chip(mouse_column, 1)
-                print(game_state)
+                print('Mouse column:', mouse_column)
+                new_chip = Chip()
+                new_chip.team = active_player.team
+                new_chip.place_chip(mouse_column)
+                check_win(new_chip)
+                if active_player is player1:
+                    active_player = player2
+                else:
+                    active_player = player1
+        
+        
                 
                 
 
