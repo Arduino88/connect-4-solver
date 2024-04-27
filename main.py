@@ -72,8 +72,6 @@ def check_win(chip):
             
     test_list = list(local_game_state[chip.column].values())
         
-    print(test_list)     
-
     test_list = clean_list(test_list)
         
     is_winner(test_list, chip.team)
@@ -97,9 +95,6 @@ def check_win(chip):
     is_winner(test_list, chip.team)
     test_list.clear()
     
-    
-            
-            
             
 def clean_list(test_list: list) -> list:
     for n in enumerate(test_list):
@@ -108,10 +103,7 @@ def clean_list(test_list: list) -> list:
         else:
             test_list[n[0]] = test_list[n[0]].team
     return test_list
-            
-            
-            
-            
+                
 
 def is_winner(test_list: list, team: str):
     
@@ -128,7 +120,6 @@ def is_winner(test_list: list, team: str):
         
         if counter == 4:
             print(team.capitalize(),'Wins!')
-
 
 
 def main():
@@ -154,7 +145,7 @@ def main():
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_column = event.__dict__['pos'][0] // scale
-                print('Mouse column:', mouse_column)
+                #print('Mouse column:', mouse_column) # debug line
                 new_chip = Chip()
                 new_chip.team = active_player.team
                 new_chip.place_chip(mouse_column)
@@ -163,11 +154,6 @@ def main():
                     active_player = player2
                 else:
                     active_player = player1
-        
-        
-                
-                
-
                     
         # clear screen
         pygame.draw.rect(screen,(100, 100, 90), [0, 0 , columns * scale, rows * scale])
@@ -182,8 +168,4 @@ def main():
         
 if __name__=="__main__":
     main()
-    
-    
-    
-    
     
