@@ -64,28 +64,50 @@ def check_win(chip):
         if column >= 0 and column < columns:
             test_list.append(local_game_state[column][chip.row])
             
-    for n in enumerate(test_list):
-        if n[1] is None:
-            continue
-        else:
-            test_list[n[0]] = test_list[n[0]].team
+    test_list = clean_list(test_list)
             
     is_winner(test_list, chip.team)
     test_list.clear()
     # Check vertical
             
-    for row in enumerate(local_game_state[chip.column]):
-        test_list.append(row[1])
+    test_list = list(local_game_state[chip.column].values())
+        
+    print(test_list)     
 
+    test_list = clean_list(test_list)
+        
+    is_winner(test_list, chip.team)
+    test_list.clear()
+    
+    # Check y = -x
+    for i in range (-4, 4):
+        if chip.column + i >= 0 and chip.row + i >=0 and chip.column + i < columns and chip.row + i < rows:
+            test_list.append(local_game_state[chip.column + i][chip.row + i])
+            
+    test_list = clean_list(test_list)
     is_winner(test_list, chip.team)
     test_list.clear()
     
     # Check y = x
+    for i in range (-4, 4):
+        if chip.column - i >= 0 and chip.row + i >=0 and chip.column - i < columns and chip.row + i < rows:
+            test_list.append(local_game_state[chip.column - i][chip.row + i])
+            
+    test_list = clean_list(test_list)
+    is_winner(test_list, chip.team)
+    test_list.clear()
+    
     
             
             
             
-            
+def clean_list(test_list: list) -> list:
+    for n in enumerate(test_list):
+        if n[1] is None:
+            continue
+        else:
+            test_list[n[0]] = test_list[n[0]].team
+    return test_list
             
             
             
@@ -100,7 +122,6 @@ def is_winner(test_list: list, team: str):
             counter = 0
         elif n == team:
             counter += 1
-            print(counter, memory)
         else:
             counter = 0
         memory = n
