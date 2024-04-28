@@ -1,7 +1,5 @@
 import pygame
 from pygame import Color
-import random
-from queue import Queue
 
 
 class Chip:
