@@ -10,13 +10,13 @@ class Chip:
         self.row = None
             
             
-    def draw(self, screen, game_controller): 
+    def draw(self, game_controller): 
         #refactor screen to be a property of Game_Controller
         # this is fucked; can't assign type to game_controller, but can pass it as a parameter without error
         # can't place Game_Controller above this because it references Chip
         # there must be a better way of doing this I am unaware of
         scale = game_controller.scale
-        pygame.draw.ellipse(screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
+        pygame.draw.ellipse(game_controller.screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
         
         
 class Game_Controller:
@@ -38,8 +38,8 @@ class Game_Controller:
         self.columns = 7
         self.rows = 6
         self.scale = 100
-        screen = pygame.display.set_mode((self.columns * self.scale, self.rows * self.scale))
-        screen.fill((100, 100, 100))
+        self.screen = pygame.display.set_mode((self.columns * self.scale, self.rows * self.scale))
+        self.screen.fill((100, 100, 100))
     
     
     def check_win(self, chip: Chip):
@@ -101,35 +101,25 @@ def is_winner(test_list: list, team: str):
             counter += 1
         else:
             counter = 0
-        memory = n
+            memory = n
         
         if counter == 4:
             print(team.capitalize(),'Wins!')
     
-    
-    
-    
-    
-    
-    
+
     
 #reset
 #reward
 #play(action) -> direction
 #game_iteration
 
-
-
-
-
-        
         
 class Connect_Four_AI:
     def __init__(self) -> None:
         self.team: str
         self.last_chip = None
     
-    def place_chip(self, chip: Chip, column, game_controller: Game_Controller) -> bool:
+    def place_chip(self, column, game_controller: Game_Controller) -> bool:
         
         new_chip = Chip()
         new_chip.team = self.team
@@ -144,6 +134,7 @@ class Connect_Four_AI:
             elif row + 1 >= game_controller.rows or game_controller.game_state[column][row+1] is not None:
                 new_chip.column = column
                 new_chip.row = row
+                self.last_chip = new_chip
                 game_controller.game_state[column][temp_row] = new_chip
                 return True
                 
@@ -158,26 +149,14 @@ class Connect_Four_AI:
 
         pass
     
-        
-
-
-
-
     
-
-        
-    
-    
-
-        
-
-
 
 
 def main():
 
     pygame.init()
     
+    master_controller = Game_Controller()
     player1 = Connect_Four_AI()
     player1.team = 'yellow'
     player2 = Connect_Four_AI()
@@ -195,23 +174,23 @@ def main():
                 running = False
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_column = event.__dict__['pos'][0] // scale
+                mouse_column = event.__dict__['pos'][0] // master_controller.scale
                 #print('Mouse column:', mouse_column) # debug line
                 
-                active_player.place_chip(mouse_column)
-                check_win(active_player.last_chip)
+                active_player.place_chip(mouse_column, master_controller)
+                master_controller.check_win(active_player.last_chip)
                 if active_player is player1:
                     active_player = player2
                 else:
                     active_player = player1
                     
         # clear screen
-        pygame.draw.rect(screen,(100, 100, 90), [0, 0 , columns * scale, rows * scale])
-        for column in game_state:
-            for row in game_state[column]:
-                if game_state[column][row] is not None:
+        pygame.draw.rect(master_controller.screen,(100, 100, 90), [0, 0 , master_controller.columns * master_controller.scale, master_controller.rows * master_controller.scale])
+        for column in master_controller.game_state:
+            for row in master_controller.game_state[column]:
+                if master_controller.game_state[column][row] is not None:
                     
-                    game_state[column][row].draw(screen)
+                    master_controller.game_state[column][row].draw(master_controller)
 
         
         pygame.display.flip()
