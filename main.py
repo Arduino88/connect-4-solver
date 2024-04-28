@@ -18,10 +18,18 @@ columns = 7
 rows = 6
 scale = 100
 
+#reset
+#reward
+#play(action) -> direction
+#game_iteration
+
+
+
+
+
 class Player:
     def __init__(self):
-        self.team = 'red' # Initialize both teams to red, switch team 2 to yellow; this is going to break something later
-        pass
+        self.team: str
         
     
 
