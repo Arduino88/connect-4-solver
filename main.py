@@ -10,7 +10,10 @@ class Chip:
             
     def draw(self, game_controller): 
         #refactor screen to be a property of Game_Controller
-        # this is fucked; can't assign type to game_controller, but can pass it as a parameter without error
+        # this is bad; can't assign type to game_controller, but can pass it as a parameter without error
+        
+        #update - error has happened regardless; fml
+        
         # can't place Game_Controller above this because it references Chip
         # there must be a better way of doing this I am unaware of
         scale = game_controller.scale
