@@ -3,105 +3,82 @@ from pygame import Color
 import random
 from queue import Queue
 
-game_state = {
-    0: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    1: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    2: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    3: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    4: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    5: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
-    6: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}  
-}
-
-
-columns = 7
-rows = 6
-scale = 100
-
-#reset
-#reward
-#play(action) -> direction
-#game_iteration
-
-
-
-
-
-class Player:
-    def __init__(self):
-        self.team: str
-        
-    
 
 class Chip:
     def __init__(self):
         self.column = None
         self.row = None
+            
+            
+    def draw(self, game_controller): 
+        #refactor screen to be a property of Game_Controller
+        # this is fucked; can't assign type to game_controller, but can pass it as a parameter without error
+        # can't place Game_Controller above this because it references Chip
+        # there must be a better way of doing this I am unaware of
+        scale = game_controller.scale
+        pygame.draw.ellipse(game_controller.screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
         
-    def place_chip(self, column) -> bool:
-        self.color = Color(self.team)
-        temp_row = 0
-        for row in game_state[column]:
-            if row == 0 and game_state[column][temp_row] is not None:
-                print('Column Full!')
-                return False
-            
-            elif row + 1 >= rows or game_state[column][row+1] is not None:
-                game_state[column][temp_row] = self
-                self.column = column
-                self.row = row
-                return True
-                
-            elif game_state[column][row+1] is None:
-                temp_row += 1
-                
-            else: 
-                print('error')
-                return False
-            
-            
-    def draw(self, screen):
-        pygame.draw.ellipse(screen, self.color, (self.column*scale + 5, self.row*scale + 5, scale - 10, scale-10))
+        
+class Game_Controller:
+    def __init__(self) -> None:
+        self.reset()
         
 
-def check_win(chip):
-    local_game_state = game_state.copy()
-    test_list = []
-    # Check adjacent
-    for column in range (chip.column - 4, chip.column + 4):
-        if column >= 0 and column < columns:
-            test_list.append(local_game_state[column][chip.row])
-            
-    test_list = clean_list(test_list)
-            
-    is_winner(test_list, chip.team)
-    test_list.clear()
-    # Check vertical
-            
-    test_list = list(local_game_state[chip.column].values())
+    def reset(self):
+        self.game_state = {
+            0: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            1: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            2: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            3: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            4: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            5: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None},
+            6: {0: None, 1: None, 2: None, 3: None, 4: None, 5: None}  
+        }
         
-    test_list = clean_list(test_list)
+        self.columns = 7
+        self.rows = 6
+        self.scale = 100
+        self.screen = pygame.display.set_mode((self.columns * self.scale, self.rows * self.scale))
+        self.screen.fill((100, 100, 100))
+    
+    
+    def check_win(self, chip: Chip):
+        test_list = []
+        # Check adjacent
+        for column in range (chip.column - 4, chip.column + 4):
+            if column >= 0 and column < self.columns:
+                test_list.append(self.game_state[column][chip.row])
+                
+        test_list = clean_list(test_list)
+                
+        is_winner(test_list, chip.team)
+        test_list.clear()
+        # Check vertical
+                
+        test_list = list(self.game_state[chip.column].values())
+            
+        test_list = clean_list(test_list)
+            
+        is_winner(test_list, chip.team)
+        test_list.clear()
         
-    is_winner(test_list, chip.team)
-    test_list.clear()
-    
-    # Check y = -x
-    for i in range (-4, 4):
-        if chip.column + i >= 0 and chip.row + i >=0 and chip.column + i < columns and chip.row + i < rows:
-            test_list.append(local_game_state[chip.column + i][chip.row + i])
-            
-    test_list = clean_list(test_list)
-    is_winner(test_list, chip.team)
-    test_list.clear()
-    
-    # Check y = x
-    for i in range (-4, 4):
-        if chip.column - i >= 0 and chip.row + i >=0 and chip.column - i < columns and chip.row + i < rows:
-            test_list.append(local_game_state[chip.column - i][chip.row + i])
-            
-    test_list = clean_list(test_list)
-    is_winner(test_list, chip.team)
-    test_list.clear()
+        # Check y = -x
+        for i in range (-4, 4):
+            if chip.column + i >= 0 and chip.row + i >=0 and chip.column + i < self.columns and chip.row + i < self.rows:
+                test_list.append(self.game_state[chip.column + i][chip.row + i])
+                
+        test_list = clean_list(test_list)
+        is_winner(test_list, chip.team)
+        test_list.clear()
+        
+        # Check y = x
+        for i in range (-4, 4):
+            if chip.column - i >= 0 and chip.row + i >=0 and chip.column - i < self.columns and chip.row + i < self.rows:
+                test_list.append(self.game_state[chip.column - i][chip.row + i])
+                
+        test_list = clean_list(test_list)
+        is_winner(test_list, chip.team)
+        test_list.clear()
     
             
 def clean_list(test_list: list) -> list:
@@ -124,23 +101,68 @@ def is_winner(test_list: list, team: str):
             counter += 1
         else:
             counter = 0
-        memory = n
+            memory = n
         
         if counter == 4:
             print(team.capitalize(),'Wins!')
+    
+
+    
+#reset
+#reward
+#play(action) -> direction
+#game_iteration
+
+        
+class Connect_Four_AI:
+    def __init__(self) -> None:
+        self.team: str
+        self.last_chip = None
+    
+    def place_chip(self, column, game_controller: Game_Controller) -> bool:
+        
+        new_chip = Chip()
+        new_chip.team = self.team
+        new_chip.color = Color(self.team)
+        
+        temp_row = 0
+        for row in game_controller.game_state[column]:
+            if row == 0 and game_controller.game_state[column][temp_row] is not None:
+                print('Column Full!')
+                return False
+            
+            elif row + 1 >= game_controller.rows or game_controller.game_state[column][row+1] is not None:
+                new_chip.column = column
+                new_chip.row = row
+                self.last_chip = new_chip
+                game_controller.game_state[column][temp_row] = new_chip
+                return True
+                
+            elif game_controller.game_state[column][row+1] is None:
+                temp_row += 1
+                
+            else: 
+                print('error')
+                return False
+        
+            
+
+        pass
+    
+    
 
 
 def main():
 
     pygame.init()
     
-    player1 = Player()
+    master_controller = Game_Controller()
+    player1 = Connect_Four_AI()
     player1.team = 'yellow'
-    player2 = Player()
+    player2 = Connect_Four_AI()
     player2.team ='red'
 
-    screen = pygame.display.set_mode((columns * scale, rows * scale))
-    screen.fill((100, 100, 100))
+    
              
     running = True
     
@@ -152,24 +174,23 @@ def main():
                 running = False
                 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_column = event.__dict__['pos'][0] // scale
+                mouse_column = event.__dict__['pos'][0] // master_controller.scale
                 #print('Mouse column:', mouse_column) # debug line
-                new_chip = Chip()
-                new_chip.team = active_player.team
-                new_chip.place_chip(mouse_column)
-                check_win(new_chip)
+                
+                active_player.place_chip(mouse_column, master_controller)
+                master_controller.check_win(active_player.last_chip)
                 if active_player is player1:
                     active_player = player2
                 else:
                     active_player = player1
                     
         # clear screen
-        pygame.draw.rect(screen,(100, 100, 90), [0, 0 , columns * scale, rows * scale])
-        for column in game_state:
-            for row in game_state[column]:
-                if game_state[column][row] is not None:
+        pygame.draw.rect(master_controller.screen,(100, 100, 90), [0, 0 , master_controller.columns * master_controller.scale, master_controller.rows * master_controller.scale])
+        for column in master_controller.game_state:
+            for row in master_controller.game_state[column]:
+                if master_controller.game_state[column][row] is not None:
                     
-                    game_state[column][row].draw(screen)
+                    master_controller.game_state[column][row].draw(master_controller)
 
         
         pygame.display.flip()
