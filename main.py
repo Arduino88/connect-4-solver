@@ -174,6 +174,13 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 
+                
+            # test Game_Controller.reset()
+            if event.type == pygame.KEYDOWN:
+                if event.unicode == 'r':
+                    master_controller.reset()
+                
+                
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_column = event.__dict__['pos'][0] // master_controller.scale
                 #print('Mouse column:', mouse_column) # debug line
